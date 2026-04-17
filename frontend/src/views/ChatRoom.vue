@@ -568,12 +568,7 @@ const updateCommentEmojiPanelPosition = (postId) => {
     const rect = btn.getBoundingClientRect()
     const panelWidth = 350
     const panelHeight = 330 // 表情面板高度
-    let left = rect.left
-    
-    if (left + panelWidth > window.innerWidth - 20) {
-      left = window.innerWidth - panelWidth - 20
-    }
-    if (left < 20) left = 20
+    let left = window.innerWidth - panelWidth - 150
     
     // 判断按钮是否在屏幕上方1/3区域，如果是则显示在按钮下方，否则显示在上方
     const isInUpperThird = rect.top < window.innerHeight / 3

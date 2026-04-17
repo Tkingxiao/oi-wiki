@@ -151,7 +151,8 @@ export async function login(accountNumber, password, token) {
             id: user.id,
             permission: Number(user.permission),
             name: user.name,
-            avatar: localAvatar || ''
+            avatar: localAvatar || '',
+            bilibili_uid: user.bilibili_uid || null
         });
     } catch (error) {
         logger.error('登录失败:', error);

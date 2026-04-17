@@ -1,4 +1,4 @@
-﻿// backend/src/services/bilibiliVideo.js
+// backend/src/services/bilibiliVideo.js
 import axios from 'axios';
 import { queryAll, queryOne, insert, remove } from '../method/database.js';
 import { createSuccessResponse, createErrorResponse } from '../method/business-utils.js';
@@ -254,9 +254,11 @@ export async function submitBvForAudit(userId, userName, userAvatar, bv, userPer
 export async function getAuditedBvList() {
     try {
         const list = queryAll(`
-            SELECT id, bv, note, created_at, updated_at
-            FROM audited_bv
-            ORDER BY created_at DESC
+            SELECT a.id, a.bv, a.note, a.created_at, a.updated_at,
+                   v.user_id, v.user_name, v.user_avatar
+            FROM audited_bv a
+            LEFT JOIN video_submissions v ON a.bv = v.bv AND v.status = 1
+            ORDER BY a.created_at DESC
             LIMIT 10
         `);
         return createSuccessResponse('获取成功', list);

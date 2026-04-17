@@ -128,6 +128,7 @@ const { token, user } = storeToRefs(userStore)
 const isAuthenticated = computed(() => !!token.value && !!user.value)
 const username = computed(() => user.value?.name || '')
 const userAvatar = computed(() => {
+  if (user.value?.bilibili_uid) return `/api/images/avatar/${user.value.bilibili_uid}.jpg`
   const url = user.value?.avatar || defaultAvatar
   return url.replace(/^http:\/\//, 'https://')
 })

@@ -659,7 +659,8 @@ onMounted(() => {
 }
 
 .preview-panel-body {
-  height: 420px;
+  height: 70vh;
+  min-height: 600px;
   padding: 12px;
   background: #fef7f0;
 }

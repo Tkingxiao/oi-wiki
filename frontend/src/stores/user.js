@@ -48,7 +48,8 @@ export const useUserStore = defineStore('user', () => {
                 id: userId,  // 必须保存 id
                 name: response.data.name,
                 permission: Number(response.data.permission),
-                avatar: fixAvatarUrl(response.data.avatar)
+                avatar: fixAvatarUrl(response.data.avatar),
+                bilibili_uid: response.data.bilibili_uid
             }
             setToken(tokenValue)
             setUser(userData)

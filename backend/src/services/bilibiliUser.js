@@ -1,4 +1,4 @@
-﻿import axios from 'axios';
+import axios from 'axios';
 
 /**
  * 获取B站用户信息（昵称和头像）
@@ -15,13 +15,16 @@ export async function getBilibiliUserInfo(uid) {
         console.warn('读取bilibili_account表失败', e.message);
     }
 
+    const commonHeaders = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://www.bilibili.com/',
+        ...(cookie && { Cookie: cookie })
+    };
+
+    // 尝试第一个API
     try {
         const res = await axios.get(`https://api.bilibili.com/x/space/acc/info?mid=${uid}`, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Referer': 'https://www.bilibili.com/',
-                ...(cookie && { Cookie: cookie })
-            },
+            headers: commonHeaders,
             timeout: 10000
         });
         if (res.data.code === 0 && res.data.data) {
@@ -34,11 +37,33 @@ export async function getBilibiliUserInfo(uid) {
                 avatar: avatar
             };
         } else {
-            console.error(`B站API返回错误: code=${res.data.code}, message=${res.data.message}`);
+            console.warn(`B站API(/acc/info)返回错误: code=${res.data.code}, message=${res.data.message}`);
+        }
+    } catch (err) {
+        console.warn(`B站API(/acc/info)请求失败: ${err.message}`);
+    }
+
+    // 降级使用第二个API
+    try {
+        const res = await axios.get(`https://api.bilibili.com/x/web-interface/card?mid=${uid}`, {
+            headers: commonHeaders,
+            timeout: 10000
+        });
+        if (res.data.code === 0 && res.data.data && res.data.data.card) {
+            let avatar = res.data.data.card.face;
+            if (avatar && avatar.startsWith('http://')) {
+                avatar = avatar.replace('http://', 'https://');
+            }
+            return {
+                name: res.data.data.card.name,
+                avatar: avatar
+            };
+        } else {
+            console.error(`B站API(/card)返回错误: code=${res.data.code}, message=${res.data.message}`);
             return null;
         }
     } catch (err) {
-        console.error('获取B站用户信息失败', err.message);
+        console.error('获取B站用户信息失败(两个API均失败)', err.message);
         return null;
     }
 }

@@ -620,7 +620,7 @@ router.put('/bilibili/videos/:id', authenticateToken, requirePermission(2), (req
 
 // ========== B站视频投稿审核接口 ==========
 // 获取待审核投稿（status = 0）
-router.get('/bilibili/videos/pending', authenticateToken, requirePermission(2), (req, res) => {
+router.get('/bilibili/videos/pending', authenticateToken, requirePermission(2), async (req, res) => {
     try {
         const list = global.db.prepare(`
             SELECT id, user_id, user_name, user_avatar, bv, note, created_at, title
@@ -628,7 +628,28 @@ router.get('/bilibili/videos/pending', authenticateToken, requirePermission(2), 
             WHERE status = 0
             ORDER BY created_at DESC
         `).all();
-        res.json({ success: true, data: list });
+        
+        // 为没有标题的视频从B站API获取
+        const { getBilibiliVideoDetail } = await import('../services/bilibiliVideo.js');
+        const processedList = [];
+        for (const item of list) {
+            if (item.title && item.title !== item.bv) {
+                processedList.push(item);
+            } else {
+                try {
+                    const detailResult = await getBilibiliVideoDetail(item.bv);
+                    if (detailResult?.success && detailResult?.data?.title) {
+                        processedList.push({ ...item, title: detailResult.data.title });
+                    } else {
+                        processedList.push(item);
+                    }
+                } catch (e) {
+                    console.error(`获取视频标题失败 [${item.bv}]:`, e.message);
+                    processedList.push(item);
+                }
+            }
+        }
+        res.json({ success: true, data: processedList });
     } catch (err) {
         console.error('获取待审核投稿失败:', err);
         res.status(500).json({ error: '获取失败' });
@@ -636,11 +657,12 @@ router.get('/bilibili/videos/pending', authenticateToken, requirePermission(2), 
 });
 
 // 获取已审核通过投稿（status = 1）
-router.get('/bilibili/videos/audited', authenticateToken, requirePermission(2), (req, res) => {
+router.get('/bilibili/videos/audited', authenticateToken, requirePermission(2), async (req, res) => {
     try {
+        const { getBilibiliVideoDetail } = await import('../services/bilibiliVideo.js');
         // 关联 audited_bv 获取标题
         const list = global.db.prepare(`
-            SELECT vs.id, vs.user_id, vs.user_name, vs.user_avatar, vs.bv, vs.note, vs.updated_at, vs.title,
+            SELECT vs.id, vs.user_id, vs.user_name, vs.user_avatar, vs.bv, vs.note, vs.created_at, vs.updated_at, vs.title,
                    ab.title as audited_title
             FROM video_submissions vs
             LEFT JOIN audited_bv ab ON vs.bv = ab.bv
@@ -648,11 +670,26 @@ router.get('/bilibili/videos/audited', authenticateToken, requirePermission(2), 
             ORDER BY vs.updated_at DESC
         `).all();
         
-        // 合并标题：优先使用 video_submissions.title，其次 audited_bv.title，最后用 bv
-        const processedList = list.map(item => ({
-            ...item,
-            title: item.title || item.audited_title || item.bv
-        }));
+        // 合并标题：优先使用 video_submissions.title，其次 audited_bv.title，再次B站API，最后用 bv
+        const processedList = [];
+        for (const item of list) {
+            if (item.title && item.title !== item.bv) {
+                processedList.push(item);
+            } else if (item.audited_title) {
+                processedList.push({ ...item, title: item.audited_title });
+            } else {
+                try {
+                    const detailResult = await getBilibiliVideoDetail(item.bv);
+                    if (detailResult?.success && detailResult?.data?.title) {
+                        processedList.push({ ...item, title: detailResult.data.title });
+                    } else {
+                        processedList.push(item);
+                    }
+                } catch (e) {
+                    processedList.push(item);
+                }
+            }
+        }
         
         res.json({ success: true, data: processedList });
     } catch (err) {

@@ -111,7 +111,6 @@
                     <el-icon><Delete /></el-icon>
                   </el-button>
                 </div>
-                <div v-if="video.note" class="video-note">{{ video.note }}</div>
               </div>
             </div>
           </div>
@@ -355,7 +354,7 @@ const fetchVideoDetail = async (bv) => {
         pic: data.pic,
         bvid: data.bvid,
         play: data.play || 0,
-        user_name: data.user_name || data.owner?.name || ''
+        user_name: data.owner?.name || ''
       }
     }
   } catch (error) {
@@ -383,7 +382,7 @@ const fetchVideos = async () => {
             id: item.id,
             note: item.note || '',
             created_at: item.created_at,
-            user_name: item.user_name || detail.user_name || ''
+            user_name: item.user_name || ''
           })
         }
       }
