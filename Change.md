@@ -255,3 +255,16 @@
    - 将 `.preview-panel-body` 高度从固定 `420px` 改为响应式 `70vh`（视口高度70%）
    - 设置最小高度 `min-height: 600px`，防止在小屏幕上过小
    - 祭礼预览面板自适应视口，显示更多内容
+
+---
+
+### 17. 排除 config.yaml 示例文件
+
+**问题描述：** `backend/.gitignore` 中排除了 `examples/config.yaml`，导致示例配置文件无法提交到仓库。
+
+**修改内容：**
+
+1. **后端.gitignore** (`backend/.gitignore` L30)
+   - 移除 `examples/config.yaml` 排除规则
+   - 保留 `configs/*.yaml` 和 `configs/*.yml` 排除规则（实际配置文件）
+   - 示例配置文件现在可以被提交到仓库

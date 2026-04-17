@@ -27,7 +27,6 @@ uploads/
 # Config files with sensitive data
 configs/*.yaml
 configs/*.yml
-examples/config.yaml
 
 # Environment variables
 .env

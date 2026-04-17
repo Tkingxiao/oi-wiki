@@ -1,0 +1,44 @@
+httpPort: 6660
+domainName:
+  - http://localhost:6660
+  - http://localhost:5173
+  - http://localhost:4173
+token: maruko
+log:
+  cmd: info
+  file: all
+redis:
+  host: localhost
+  port: 6379
+  password: null
+email:
+  host: smtp.qq.com # 邮箱服务器地址 示例为QQ邮箱
+  port: 587
+  secure: false
+  auth:
+    user: xxxx@xx.com
+    # 邮箱账号
+    pass: xxxxxxxxx
+    # 请在邮箱中开启SMTP服务并获取授权码
+    # 邮箱授权码
+  from: xxxx <xxxxx@xx.com>
+  # 发件人姓名
+  subject: xxxx-wiki
+  # 邮件主题
+bilibili:
+  roomId: 1809236885
+  userId: 3546585537448033
+  ttl: 60
+deepseek:
+  apiKey: null
+ai:
+  limits:
+    authenticated: 100  # 已登录用户每日使用次数
+    guest: 5           # 未登录用户每日使用次数
+  security:
+    maxRequestsPerMinute: 10  # 每分钟最大请求次数（IP级别）
+    maxRequestsPerHour: 50    # 每小时最大请求次数（IP级别）
+    suspiciousThreshold: 20   # 可疑行为阈值（连续失败次数）
+    blockDuration: 3600       # 封禁时长（秒）
+download: 
+  audio: 200
