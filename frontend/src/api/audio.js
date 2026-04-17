@@ -1,0 +1,83 @@
+﻿import http from '@/utils/http'
+
+/**
+ * 获取分组音声列表
+ * @returns {Promise<Array>} 音声分类数组
+ */
+export function getAudioList() {
+    return http.get('/audios')
+}
+
+/**
+ * 上传音声文件
+ * @param {FormData} formData - 包含audio文件和相关参数的FormData对象
+ * @returns {Promise<Object>} 上传结果
+ */
+export function uploadAudio(formData) {
+    return http.post('/audios', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    })
+}
+
+/**
+ * AI音频匹配
+ * @param {string} description - 用户对所需音频的描述文本
+ * @returns {Promise<Object>} 匹配结果
+ */
+export function matchAudiosByAI(description) {
+    return http.post('/ai/match-audios', {
+        description
+    })
+}
+
+/**
+ * 下载音声（直接触发浏览器下载）
+ * @param {number} classificationId - 分类ID，为null时下载全部
+ */
+export function downloadAudios(classificationId) {
+    const params = classificationId ? `classification_id=${classificationId}` : '';
+    const token = localStorage.getItem('oi_token');
+    const baseUrl = import.meta.env.VITE_APP_BASE_URL === '/api' ? '' : import.meta.env.VITE_APP_BASE_URL;
+    const url = `${baseUrl}/api/audios/download/${token}?${params}`;
+    
+    // 创建隐藏的链接并触发下载
+    const link = document.createElement('a');
+    link.href = url;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+/**
+ * 记录音频播放量
+ * @param {number} id - 音频ID
+ * @returns {Promise<Object>} 记录结果
+ */
+export function recordAudioPlay(id) {
+    return http.post(`/audios/${id}/play`)
+}
+
+/**
+ * 获取7天热门音频（Redis）
+ * @param {number} limit - 返回数量，默认10，最大50
+ * @returns {Promise<Object>} 热门音频列表
+ */
+export function getWeeklyPopularAudios(limit = 10) {
+    return http.get('/audios/popular/weekly', {
+        params: { limit }
+    })
+}
+
+/**
+ * 获取总播放量排行（SQLite）
+ * @param {number} limit - 返回数量，默认10，最大50
+ * @returns {Promise<Object>} 热门音频列表
+ */
+export function getTotalPopularAudios(limit = 10) {
+    return http.get('/audios/popular/total', {
+        params: { limit }
+    })
+}

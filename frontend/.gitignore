@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Public static resources (emojis, images, icons, etc.)
+public/images/
+public/favicon.png
+
+# Environment variables (may contain sensitive data)
+.env
+.env.local
+.env.development.local
+.env.production.local
+.env.development
+.env.production
+
+# Build outputs
+dist/
+dist-ssr/
+coverage/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.vscode/
+
+# Cache files
+*.tsbuildinfo
+.eslintcache
+*.local
+
+# Lock files (optional)
+# package-lock.json
+# pnpm-lock.yaml
+# pnpm-workspace.yaml
+
+# Cypress
+/cypress/videos/
+/cypress/screenshots/
+
+# Vitest
+__screenshots__/

@@ -1,0 +1,67 @@
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Data directory (audios, images, plans, SQL databases)
+data/
+
+# Uploads directory
+uploads/
+
+# Config files with sensitive data
+configs/*.yaml
+configs/*.yml
+examples/config.yaml
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+dist-ssr/
+coverage/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Cache files
+*.tsbuildinfo
+.eslintcache
+*.local
+
+# Lock files (optional)
+# package-lock.json
+# pnpm-lock.yaml
+# pnpm-workspace.yaml
+
+# Cypress
+/cypress/videos/
+/cypress/screenshots/
+
+# Vitest
+__screenshots__/

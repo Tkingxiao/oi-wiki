@@ -1,0 +1,4 @@
+allowBuilds:
+  '@vue-office/docx': true
+  esbuild: true
+  vue-demi: true
