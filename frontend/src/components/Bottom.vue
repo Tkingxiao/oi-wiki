@@ -1,10 +1,10 @@
-﻿<script setup>
+<script setup>
 import gitee from '@/assets/gitee.png'
 import github from '@/assets/github.png'
 
 const platformLinks = [
-    { name: 'Gitee', icon: gitee, url: 'https://gitee.com/xiaofeiawa/oi-wiki/' },
-    { name: 'GitHub', icon: github, url: 'https://github.com/xiaofei114/oi-wiki/' }
+    { name: 'Gitee', icon: gitee, url: 'https://gitee.com/jing-xiao/oi-wiki/' },
+    { name: 'GitHub', icon: github, url: 'https://github.com/Tkingxiao/oi-wiki/' }
 ];
 
 const currentYear = new Date().getFullYear()

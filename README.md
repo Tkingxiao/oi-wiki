@@ -1,8 +1,10 @@
 # 黛棠OI-WIKI
 
-一个面向黛棠OI社区的前后端一体项目，包含内容展示、公告系统、相册/音声/企划表与管理后台能力。
+一个面向黛棠社区的前后端一体项目，包含内容展示、公告系统、相册/音声/企划表、ChatRoom、节目大全、签到排行与管理后台能力。
 
 > 提示：当前仓库数据可能为清空状态（0 相册 / 0 音声 / 0 企划 / 0 用户），但功能代码完整可用。
+
+> 本项目基于 [maruko-wiki](https://github.com/xiaofei114/maruko-wiki) / [maruko-wiki(Gitee)](https://gitee.com/xiaofeiawa/maruko-wiki) 修改而来，已获得原作者授权。
 
 ## 功能说明（按当前代码）
 
@@ -13,7 +15,11 @@
 - 音声（`/audio`）：音频分类与播放。
 - 公告（`/announcement`）：公告列表与内容展示。
 - 企划表（`/plan-document`）：Word 文档列表、选中联动实时预览（支持文档内图片渲染）。
-- 登录（`/login`）、个人页（`/profile`）、后台（`/admin`）。
+- ChatRoom（`/chatRoom`）：社区聊天室，支持弹幕、评论、表情、图片、收藏表情、绘马、祝词等功能。
+- 节目大全（`/program`）：结缘之间视频展示，支持BV号视频播放与奉纳者信息。
+- 签到排行（`/checkin-rank`）：用户签到与排行榜（需登录）。
+- 个人中心（`/user-center`）：用户个人信息管理（需登录）。
+- 登录（`/login`）、后台（`/admin`）。
 
 ### 管理后台
 
@@ -21,6 +27,10 @@
 - 相册管理：审核、编辑、删除。
 - 企划表管理：设置当前文档、删除、右侧实时预览。
 - 用户管理（超管可见）：权限调整、封禁/解封、重置密码、删除。
+- 绘马帐管理：审核、编辑、删除、通过。
+- 祝词管理：审核、试听、编辑、删除、通过。
+- 祭礼表（缘结视频）管理：待审核列表、已审核列表、视频详情查看。
+- ChatRoom管理：弹幕管理、评论管理、收藏表情管理、绘马管理、祝词管理。
 
 ### 后端服务
 
@@ -28,6 +38,9 @@
 - SQLite 数据存储（`maruko-sql.db` 为主库）。
 - 文件访问接口（`/api/file/*`）。
 - 公告、相册、音声、企划表、用户、Bilibili 代理、AI 路由。
+- ChatRoom 相关服务（弹幕、评论、表情、绘马、祝词）。
+- 签到系统。
+- 视频投稿审核系统。
 
 ## 技术栈
 
@@ -36,7 +49,7 @@
 - Vue 3 + Vite
 - Element Plus + Pinia + Vue Router
 - Axios
-- `docx-preview`（当前文档预览主方案）
+- `docx-preview`（文档预览主方案）
 - `@vue-office/docx`（历史依赖，仍在 `package.json` 中）
 
 ### 后端
@@ -73,6 +86,7 @@ oi-wiki/
 ├── sql.sql
 ├── sql.yaml
 ├── Extension.md              # 自定义修改详细指南
+├── Change.md                 # 修改记录
 └── README.md
 ```
 
@@ -187,7 +201,7 @@ email:
 
 | 文件位置                                 | 配置项              |
 | ------------------------------------ | ---------------- |
-| `frontend/src/components/Bottom.vue` | 辽ICP备2024032879号 |
+| `frontend/src/components/Bottom.vue` | 琼ICP备2025062133号 |
 
 ### 5. 主题颜色
 
@@ -224,8 +238,8 @@ email:
 
 | 文件位置                                 | 链接                                               |
 | ------------------------------------ | ------------------------------------------------ |
-| `frontend/src/components/Bottom.vue` | Gitee: <https://gitee.com/xiaofeiawa/oi-wiki/>   |
-| `frontend/src/components/Bottom.vue` | GitHub: <https://github.com/xiaofei114/oi-wiki/> |
+| `frontend/src/components/Bottom.vue` | Gitee: <https://gitee.com/jing-xiao/oi-wiki/>   |
+| `frontend/src/components/Bottom.vue` | GitHub: <https://github.com/Tkingxiao/oi-wiki/> |
 | `frontend/src/components/Bottom.vue` | 爱发电: <https://afdian.com/a/xiaofeiqwq/>          |
 
 ### 9. 页面文字
@@ -420,6 +434,10 @@ node create-user.js 管理员 admin@123.com 123456 2
 ### C. 更多自定义修改
 
 详细的自定义修改指南请参考 [Extension.md](./Extension.md)。
+
+### D. 修改记录
+
+详细的修改历史请参考 [Change.md](./Change.md)。
 
 ## 许可证
 

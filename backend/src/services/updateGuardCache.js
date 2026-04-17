@@ -29,6 +29,8 @@ function initDatabase() {
         fs.mkdirSync(dataDir, { recursive: true });
     }
     db = new Database('./data/maruko-sql.db');
+    db.pragma('journal_mode = DELETE');
+    db.pragma('foreign_keys = ON');
 
     db.prepare(`
         CREATE TABLE IF NOT EXISTS guard_cache (

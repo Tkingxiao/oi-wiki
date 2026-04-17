@@ -8,6 +8,10 @@ export default () => {
         fileMustExist: false,
         foreign_keys: true // better-sqlite3特有配置
     });
+    
+    // 使用DELETE模式替代WAL模式，避免生成.db-wal和.db-shm文件
+    db.pragma('journal_mode = DELETE');
+    
     global.db = db;
     logger.info(chalk.white('数据库连接成功: ' + chalk.blue(dbPath)))
     

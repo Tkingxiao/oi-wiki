@@ -669,11 +669,12 @@ const generateFakeLiveData = (year, month, day) => {
 
     if (isStart && isEnd) totalHours += calculateSessionDuration(s.startTime, end) / 60
     else if (isStart) {
-      const min = (24 - sd.getHours()) * 60 - sd.getMinutes()
-      totalHours += min / 60
+      const startSeconds = sd.getHours() * 3600 + sd.getMinutes() * 60 + sd.getSeconds()
+      const remainSeconds = 86400 - startSeconds
+      totalHours += remainSeconds / 3600
     } else if (isEnd) {
-      const min = ed.getHours() * 60 + ed.getMinutes()
-      totalHours += min / 60
+      const endSeconds = ed.getHours() * 3600 + ed.getMinutes() * 60 + ed.getSeconds()
+      totalHours += endSeconds / 3600
     } else totalHours += 24
   })
 
@@ -687,8 +688,15 @@ const generateFakeLiveData = (year, month, day) => {
     const isEnd = ed.getFullYear() === cur.getFullYear() && ed.getMonth() === cur.getMonth() && ed.getDate() === cur.getDate()
     let dayMin = 0
     if (isStart && isEnd) dayMin = calculateSessionDuration(s.startTime, end)
-    else if (isStart) dayMin = (24 - sd.getHours()) * 60 - sd.getMinutes()
-    else if (isEnd) dayMin = ed.getHours() * 60 + ed.getMinutes()
+    else if (isStart) {
+      const startSeconds = sd.getHours() * 3600 + sd.getMinutes() * 60 + sd.getSeconds()
+      const remainSeconds = 86400 - startSeconds
+      dayMin = Math.floor(remainSeconds / 60)
+    }
+    else if (isEnd) {
+      const endSeconds = ed.getHours() * 3600 + ed.getMinutes() * 60 + ed.getSeconds()
+      dayMin = Math.floor(endSeconds / 60)
+    }
     else dayMin = 1440
     if (dayMin >= 120) {
       effective = true
