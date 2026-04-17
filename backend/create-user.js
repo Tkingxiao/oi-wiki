@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { getBilibiliUserInfo, getBilibiliMedal } from './src/services/bilibiliUser.js';
 
 const db = new Database('./data/maruko-sql.db');
+global.db = db;
 
 // 命令行参数：node create-user.js <名字> <邮箱> <密码> <权限> <bilibili_uid>
 const nameArg = process.argv[2] || null;

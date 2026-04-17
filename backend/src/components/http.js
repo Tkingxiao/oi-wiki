@@ -39,7 +39,8 @@ export default async () => {
         }
     }));
     App.use(express.json());
-    App.use('/uploads', express.static('uploads'));
+    App.use('/api/file/data/document/images/ChatRoom', express.static('data/document/images/ChatRoom'));
+    App.use('/uploads/chatRoom', (req, res) => { res.redirect(301, req.originalUrl.replace('/uploads/chatRoom', '/api/file/data/document/images/ChatRoom')) });
     App.use(express.urlencoded({ extended: false }));
     // 请求日志中间件
     App.use((req, res, next) => {

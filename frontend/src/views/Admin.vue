@@ -64,6 +64,30 @@
           </div>
         </div>
 
+        <!-- 移动端快捷导航 -->
+        <div class="mobile-nav" v-if="permission === 0 || permission === 1">
+          <button class="mobile-nav-btn" :class="{ active: activeTab === 'audio' }" @click="switchTab('audio')">
+            <el-icon><VideoPlay /></el-icon>
+            <span>祝词管理</span>
+          </button>
+          <button class="mobile-nav-btn" :class="{ active: activeTab === 'albums' }" @click="switchTab('albums')">
+            <el-icon><Picture /></el-icon>
+            <span>绘马帐管理</span>
+          </button>
+          <button class="mobile-nav-btn" :class="{ active: activeTab === 'users' }" @click="switchTab('users')">
+            <el-icon><User /></el-icon>
+            <span>氏子管理</span>
+          </button>
+          <button class="mobile-nav-btn" :class="{ active: activeTab === 'plan-documents' }" @click="switchTab('plan-documents')">
+            <el-icon><Document /></el-icon>
+            <span>祭礼表管理</span>
+          </button>
+          <button class="mobile-nav-btn" :class="{ active: activeTab === 'bilibiliVideos' }" @click="switchTab('bilibiliVideos')">
+            <el-icon><Connection /></el-icon>
+            <span>缘结视频</span>
+          </button>
+        </div>
+
         <!-- 二级导航与内容面板 -->
         <div class="content-panel">
           <!-- 二级菜单区域（标签页形式） -->
@@ -143,7 +167,7 @@
                   <el-tag :type="doc.isReview === 1 ? 'success' : doc.isReview === 0 ? 'warning' : 'danger'" size="small">{{ doc.isReview === 1 ? '已纳' : doc.isReview === 0 ? '待审' : '不纳' }}</el-tag>
                 </div>
               </div>
-              <el-pagination small layout="prev, pager, next" :total="filteredPlanDocuments.length" :page-size="planDocumentPageSize" @current-change="handlePlanDocumentPageChange" />
+              <el-pagination small layout="prev, pager, next" :total="filteredPlanDocuments.length" :page-size="planDocumentPageSize" @current-change="handlePlanDocumentPageChange" style="margin-top: 16px;" />
             </template>
 
             <!-- B站视频管理 -->
@@ -181,17 +205,18 @@
                 <el-form-item><el-button @click="resetAudioFilters" class="kamihome-btn small">重置</el-button></el-form-item>
               </el-form>
               <el-table :data="paginatedAudios" stripe class="modern-table">
-                <el-table-column prop="name" label="名称" min-width="150" />
-                <el-table-column prop="user_name" label="奉纳者" width="100" />
-                <el-table-column label="状态" width="80">
+                <el-table-column prop="name" label="名称" min-width="120" />
+                <el-table-column prop="user_name" label="奉纳者" width="80" />
+                <el-table-column label="状态" width="70">
                   <template #default="{ row }">
                     <el-tag :type="row.is_review === 1 ? 'success' : row.is_review === 0 ? 'warning' : 'danger'" size="small">
                       {{ row.is_review === 1 ? '已纳' : row.is_review === 0 ? '待审' : '不纳' }}
                     </el-tag>
                   </template>
                 </el-table-column>
-                <el-table-column label="操作" width="200">
+                <el-table-column label="操作" width="260" v-if="permission === 0 || permission === 1">
                   <template #default="{ row }">
+                    <el-button v-if="row.is_review !== 1" size="small" type="success" @click="approveAudio(row)">通过</el-button>
                     <el-button size="small" @click="toggleAudioPlay(row)">试听</el-button>
                     <el-button size="small" @click="editAudio(row)">编辑</el-button>
                     <el-button size="small" type="danger" @click="handleDeleteAudio(row, selectedAudio)">删除</el-button>
@@ -212,17 +237,18 @@
                 <el-form-item><el-button @click="resetAlbumFilters" class="kamihome-btn small">重置</el-button></el-form-item>
               </el-form>
               <el-table :data="paginatedPhotos" stripe class="modern-table">
-                <el-table-column prop="name" label="名称" min-width="150" />
-                <el-table-column prop="user_name" label="奉纳者" width="100" />
-                <el-table-column label="状态" width="80">
+                <el-table-column prop="name" label="名称" min-width="120" />
+                <el-table-column prop="user_name" label="奉纳者" width="80" />
+                <el-table-column label="状态" width="70">
                   <template #default="{ row }">
                     <el-tag :type="row.is_review === 1 ? 'success' : row.is_review === 0 ? 'warning' : 'danger'" size="small">
                       {{ row.is_review === 1 ? '已纳' : row.is_review === 0 ? '待审' : '不纳' }}
                     </el-tag>
                   </template>
                 </el-table-column>
-                <el-table-column label="操作" width="200">
+                <el-table-column label="操作" width="260" v-if="permission === 0 || permission === 1">
                   <template #default="{ row }">
+                    <el-button v-if="row.is_review !== 1" size="small" type="success" @click="approvePhoto(row)">通过</el-button>
                     <el-button size="small" @click="editPhoto(row)">编辑</el-button>
                     <el-button size="small" type="danger" @click="handleDeletePhoto(row, selectedAlbum)">删除</el-button>
                   </template>
@@ -245,7 +271,7 @@
                 <el-descriptions-item label="账号">{{ selectedUser.account_number }}</el-descriptions-item>
                 <el-descriptions-item label="状态"><el-tag :type="getStatusType(selectedUser.is_banned)">{{ getStatusLabel(selectedUser.is_banned) }}</el-tag></el-descriptions-item>
                 <el-descriptions-item label="入社日">{{ formatTime(selectedUser.create_time) }}</el-descriptions-item>
-                <el-descriptions-item label="大航海等级">{{ selectedUser.guard_level ?? selectedUser.medal_level ?? 0 }}</el-descriptions-item>
+                <el-descriptions-item label="大航海等级">{{ selectedUser.medal_level ?? selectedUser.guard_level ?? 0 }}</el-descriptions-item>
                 <el-descriptions-item label="大航海身份">{{ selectedUser.badge || '未上供' }}</el-descriptions-item>
               </el-descriptions>
               <div class="profile-actions">
@@ -271,22 +297,31 @@
 
             <!-- B站视频审核详情 -->
             <div v-else-if="selectedVideo && activeTab === 'bilibiliVideos'" class="video-review-card">
-              <div class="video-cover-wrapper" @click="previewVideo(selectedVideo.bv)">
-                <img :src="getBilibiliCover(selectedVideo.bv)" class="video-cover-img" @error="handleCoverError" referrerpolicy="no-referrer" />
-                <div class="video-cover-overlay"><el-icon size="48"><VideoPlay /></el-icon></div>
-              </div>
-              <div class="video-info-section">
-                <div class="info-row"><span class="label">奉纳者：</span>{{ selectedVideo.user_name }}</div>
-                <div class="info-row" v-if="selectedVideo.note"><span class="label">备注：</span>{{ selectedVideo.note }}</div>
-              </div>
-              <div class="video-actions">
-                <template v-if="selectedVideo.status === 0">
-                  <el-button type="success" @click="approveVideo(selectedVideo)">通过</el-button>
-                  <el-button type="danger" @click="rejectVideo(selectedVideo)">拒绝</el-button>
-                </template>
-                <template v-else>
-                  <el-button type="danger" @click="deleteAuditedVideo(selectedVideo)">删除</el-button>
-                </template>
+              <div class="video-content">
+                <div class="video-cover-wrapper" @click="previewVideo(selectedVideo.bv)">
+                  <img :src="getBilibiliCover(selectedVideo.bv)" class="video-cover-img" @error="handleCoverError" referrerpolicy="no-referrer" />
+                  <div class="video-cover-overlay"><el-icon size="48"><VideoPlay /></el-icon></div>
+                </div>
+                <div class="video-info-section">
+                  <div class="video-title">{{ selectedVideo.title || selectedVideo.bv }}</div>
+                  <div class="video-meta-row">
+                    <span class="meta-label">奉纳者：</span>
+                    <span class="meta-value">{{ selectedVideo.user_name || '未知' }}</span>
+                  </div>
+                  <div class="video-meta-row">
+                    <span class="meta-label">奉纳时间：</span>
+                    <span class="meta-value">{{ formatTime(selectedVideo.created_at) }}</span>
+                  </div>
+                  <div class="video-actions">
+                    <template v-if="selectedVideo.status === 0">
+                      <el-button type="success" @click="approveVideo(selectedVideo)">通过</el-button>
+                      <el-button type="danger" @click="rejectVideo(selectedVideo)">拒绝</el-button>
+                    </template>
+                    <template v-else>
+                      <el-button type="danger" @click="deleteAuditedVideo(selectedVideo)">删除</el-button>
+                    </template>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -376,7 +411,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
-import { User, Picture, Files, VideoPlay, Edit, Delete, InfoFilled, VideoPause, Document, Refresh, Check, Close, Search, Clock } from '@element-plus/icons-vue'
+import { User, Picture, Files, VideoPlay, Edit, Delete, InfoFilled, VideoPause, Document, Refresh, Check, Close, Search, Clock, Connection } from '@element-plus/icons-vue'
 import DocxPreview from '@/components/DocxPreview.vue'
 import axios from 'axios'
 import defaultAvatar from '@/assets/用户.jpg'
@@ -701,7 +736,12 @@ const fetchVideoDetail = async (bv) => {
     try {
         const token = localStorage.getItem('oi_token')
         const res = await axios.get(`/api/bilibili/video/detail/${bv}`, { headers: { Authorization: `Bearer ${token}` } })
-        if (res.data.code === 200 && res.data.data?.pic) videoCovers.value[bv] = res.data.data.pic
+        if (res.data.code === 200 && res.data.data) {
+            if (res.data.data.pic) videoCovers.value[bv] = res.data.data.pic
+            if (res.data.data.title && selectedVideo.value?.bv === bv) {
+                selectedVideo.value.title = res.data.data.title
+            }
+        }
     } catch { }
 }
 const handleCoverError = (e) => { e.target.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'320\' height=\'180\' viewBox=\'0 0 320 180\'%3E%3Crect width=\'320\' height=\'180\' fill=\'%23f5e6d3\'/%3E%3Ctext x=\'160\' y=\'95\' font-size=\'14\' text-anchor=\'middle\' fill=\'%23c33a2b\'%3E🦊 无封面%3C/text%3E%3C/svg%3E' }
@@ -1113,6 +1153,7 @@ onMounted(fetchAllData)
   display: flex;
   gap: 20px;
 }
+.mobile-nav { display: none; }
 
 .sub-nav {
   width: 280px;
@@ -1187,11 +1228,16 @@ onMounted(fetchAllData)
 .video-cover-img { width: 100%; height: 100%; object-fit: cover; }
 .video-cover-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; color: white; }
 .video-cover-wrapper:hover .video-cover-overlay { opacity: 1; }
-.video-info-section { margin: 16px 0; }
+.video-review-card .video-content { display: flex; gap: 16px; }
+.video-review-card .video-info-section { flex: 1; }
+.video-title { font-size: 16px; font-weight: 700; color: #5e2c1a; margin-bottom: 12px; line-height: 1.4; }
+.video-meta-row { display: flex; justify-content: space-between; padding: 6px 0; color: #5e2c1a; }
+.meta-label { font-weight: 600; color: #7a3a28; }
+.meta-value { color: #5e2c1a; }
 .info-row { padding: 4px 0; color: #5e2c1a; }
 .info-row .label { font-weight: 700; width: 70px; display: inline-block; }
 .bv-code { font-family: monospace; background: rgba(200,60,40,0.1); padding: 2px 8px; border-radius: 4px; }
-.video-actions { display: flex; gap: 12px; }
+.video-actions { display: flex; gap: 12px; margin-top: 12px; }
 
 .guard-section .section-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
 .guard-section .guard-info { display: flex; gap: 16px; color: #7a3a28; }
@@ -1229,6 +1275,26 @@ onMounted(fetchAllData)
   .menu-label { display: block; font-size: 10px; }
   .content-panel { flex-direction: column; }
   .sub-nav { width: 100%; border-right: none; }
-  .stats-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+  .stat-card { padding: 12px; gap: 10px; border-radius: 12px; }
+  .stat-icon { width: 36px; height: 36px; border-radius: 10px; }
+  .stat-icon .el-icon { font-size: 18px; }
+  .stat-value { font-size: 22px; }
+  .stat-label { font-size: 12px; }
+  .mobile-nav { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 0 12px; margin-bottom: 16px; }
+  .mobile-nav-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 10px 4px; background: white; border: 1px solid #c33a2b; border-radius: 10px; color: #5e2c1a; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; }
+  .mobile-nav-btn .el-icon { font-size: 20px; color: #c33a2b; }
+  .mobile-nav-btn.active { background: #c33a2b; color: white; }
+  .mobile-nav-btn.active .el-icon { color: white; }
+  .sidebar { display: none; }
+  .video-review-card .video-content { flex-direction: column; }
+  .video-review-card .video-cover-wrapper { max-width: 100%; }
+  .video-review-card .video-info-section { text-align: center; }
+  .video-review-card .video-title { font-size: 14px; }
+  .video-review-card .video-meta-row { justify-content: center; gap: 12px; font-size: 12px; }
+  .video-review-card .video-actions { justify-content: center; }
+  .doc-preview :deep(docx-preview) .docx-wrapper { transform: scale(0.45); transform-origin: top left; }
+  .doc-preview :deep(docx-preview) { height: 400px !important; overflow: auto; }
+  .doc-preview :deep(docx-preview) .docx-wrapper > section.docx { padding: 8pt 12pt !important; width: 100% !important; max-width: 100% !important; min-height: auto !important; }
 }
 </style>

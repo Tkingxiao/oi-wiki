@@ -113,9 +113,12 @@ async function addWatermark(inputPath, outputPath) {
     }
 }
 
+const CHATROOM_BASE = 'data/document/images/ChatRoom';
+const CHATROOM_URL_BASE = '/api/file/data/document/images/ChatRoom';
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const dir = 'uploads/chatRoom/temp';
+        const dir = `${CHATROOM_BASE}/temp`;
         if (!fsSync.existsSync(dir)) fsSync.mkdirSync(dir, { recursive: true });
         cb(null, dir);
     },
@@ -147,13 +150,13 @@ router.post('/upload-image', authenticateToken, upload.single('image'), async (r
     if (!req.file) return res.status(400).json({ error: '请选择图片' });
     try {
         const tempPath = req.file.path;
-        const finalDir = 'uploads/chatRoom';
+        const finalDir = CHATROOM_BASE;
         if (!fsSync.existsSync(finalDir)) fsSync.mkdirSync(finalDir, { recursive: true });
         const finalFilename = path.basename(req.file.filename);
         const finalPath = path.join(finalDir, finalFilename);
         await addWatermark(tempPath, finalPath);
         await deleteWithRetry(tempPath);
-        const imageUrl = `/uploads/chatRoom/${finalFilename}`;
+        const imageUrl = `${CHATROOM_URL_BASE}/${finalFilename}`;
         res.json({ success: true, url: imageUrl });
     } catch (err) {
         console.error(err);
@@ -184,7 +187,7 @@ router.post('/favorite-emojis', authenticateToken, upload.single('image'), async
     if (count >= 10) return res.status(400).json({ error: '收藏已达上限（10个）' });
     try {
         const tempPath = req.file.path;
-        const finalDir = 'uploads/chatRoom/favorites';
+        const finalDir = `${CHATROOM_BASE}/favorites`;
         if (!fsSync.existsSync(finalDir)) fsSync.mkdirSync(finalDir, { recursive: true });
         const ext = path.extname(req.file.originalname);
         const finalFilename = Date.now() + '-' + Math.round(Math.random() * 1E9) + ext;
@@ -194,7 +197,7 @@ router.post('/favorite-emojis', authenticateToken, upload.single('image'), async
             await fs.copyFile(tempPath, finalPath);
         }
         await deleteWithRetry(tempPath);
-        const imageUrl = `/uploads/chatRoom/favorites/${finalFilename}`;
+        const imageUrl = `${CHATROOM_URL_BASE}/favorites/${finalFilename}`;
         global.db.prepare('INSERT INTO user_favorite_emojis (user_id, image_url) VALUES (?, ?)').run(userId, imageUrl);
         res.json({ success: true, url: imageUrl });
     } catch (err) {
@@ -239,7 +242,7 @@ router.post('/post', authenticateToken, upload.array('images', 9), async (req, r
         const postId = info.lastInsertRowid;
         if (req.files && req.files.length) {
             const imgStmt = global.db.prepare('INSERT INTO ga_post_image (post_id, image_url, sort_order) VALUES (?, ?, ?)');
-            const finalDir = 'uploads/chatRoom';
+            const finalDir = CHATROOM_BASE;
             if (!fsSync.existsSync(finalDir)) fsSync.mkdirSync(finalDir, { recursive: true });
             for (let i = 0; i < req.files.length; i++) {
                 const file = req.files[i];
@@ -248,7 +251,7 @@ router.post('/post', authenticateToken, upload.array('images', 9), async (req, r
                 const finalPath = path.join(finalDir, finalFilename);
                 await addWatermark(tempPath, finalPath);
                 await deleteWithRetry(tempPath);
-                const url = `/uploads/chatRoom/${finalFilename}`;
+                const url = `${CHATROOM_URL_BASE}/${finalFilename}`;
                 imgStmt.run(postId, url, i);
             }
         }
@@ -412,13 +415,13 @@ router.post('/comment', authenticateToken, upload.single('image'), async (req, r
         let imageUrl = null;
         if (req.file) {
             const tempPath = req.file.path;
-            const finalDir = 'uploads/chatRoom/comments';
+            const finalDir = `${CHATROOM_BASE}/comments`;
             if (!fsSync.existsSync(finalDir)) fsSync.mkdirSync(finalDir, { recursive: true });
             const finalFilename = path.basename(req.file.filename);
             const finalPath = path.join(finalDir, finalFilename);
             await addWatermark(tempPath, finalPath);
             await deleteWithRetry(tempPath);
-            imageUrl = `/uploads/chatRoom/comments/${finalFilename}`;
+            imageUrl = `${CHATROOM_URL_BASE}/comments/${finalFilename}`;
         }
         const stmt = global.db.prepare('INSERT INTO ga_comment (post_id, user_id, content, image_url, created_at) VALUES (?, ?, ?, ?, ?)');
         stmt.run(postId, userId, cleanContent, imageUrl, now);

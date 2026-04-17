@@ -967,7 +967,7 @@ onBeforeUnmount(() => {
                         <el-select v-model="uploadForm.audioTag" placeholder="请选择或输入类别" style="width: 100%" @change="handleTagSelect" filterable allow-create>
                             <el-option v-for="tag in tagOptions" :key="tag.value" :label="tag.label" :value="tag.value" />
                         </el-select>
-                        <div class="tag-tip">💮 输入新类别名称可创建新绘马</div>
+                        <div class="tag-tip">💮 输入新类别名称可创建新类别</div>
                     </el-form-item>
                 </el-form>
                 <template #footer>

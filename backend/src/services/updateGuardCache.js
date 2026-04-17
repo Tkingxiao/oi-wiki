@@ -281,6 +281,19 @@ function saveCache(members, updateTime, apiTotalCount = 0) {
     `).run(members.length, apiTotalCount, updateTime);
     
     console.log(`✅ 缓存已更新，共 ${members.length} 条记录 (API报告: ${apiTotalCount})`);
+
+    // 同步大航海等级到 user 表
+    const update = db.prepare(`
+        UPDATE user SET medal_level = ? WHERE bilibili_uid = ?
+    `);
+    let synced = 0;
+    for (const m of members) {
+        const uidStr = String(m.uid);
+        const medalLevel = extractMedalLevel(m);
+        const result = update.run(medalLevel, uidStr);
+        if (result.changes > 0) synced++;
+    }
+    console.log(`✅ 已同步 ${synced} 个用户的大航海等级到 user 表`);
 }
 
 export async function refreshGuardCache() {
