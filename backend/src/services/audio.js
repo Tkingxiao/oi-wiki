@@ -1,9 +1,11 @@
-﻿import path from 'path';
+import path from 'path';
 import fs from 'fs';
 import { queryOne, queryAll, insert, update, remove, softDelete } from '../method/database.js';
+import { uploadToCOS, deleteFromCOS, generateCOSKey, isCOSUrl, extractKeyFromCOSUrl, isCOSAvailable } from './cos.js';
 
 /**
  * 音声服务 - 处理音声相关的业务逻辑
+ * 支持本地存储和腾讯云 COS 对象存储双模式
  */
 
 /**
@@ -80,7 +82,7 @@ export async function getAudiosGrouped() {
             const processedAudios = audios.map(audio => ({
                 id: audio.id,
                 name: audio.name,
-                url: `/api/file/${audio.url}`
+                url: isCOSUrl(audio.url) ? audio.url : `/api/file/${audio.url}`
             }));
 
             if (processedAudios.length > 0) {
@@ -122,22 +124,42 @@ export async function uploadAudio(file, audioData, userId, userPermission) {
             return { success: false, message: '请上传音声文件' };
         }
 
-        const allowedTypes = ['audio/mpeg', 'audio/mp3'];
+        const allowedTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg'];
         if (!allowedTypes.includes(file.mimetype)) {
-            return { success: false, message: '不支持的文件类型，只允许上传MP3格式的音频文件' };
+            return { success: false, message: '不支持的文件类型，只允许上传音频文件' };
         }
 
-        const fileName = path.basename(file.path);
-        const filePath = path.join('audios', fileName).replace(/\\/g, '/');
         const isReview = userPermission <= 2 ? 1 : 0;
         const currentTime = Math.floor(Date.now() / 1000);
+        
+        let finalUrl;
+        
+        if (isCOSAvailable()) {
+            const timestamp = Date.now();
+            const randomStr = Math.random().toString(36).substring(2, 8);
+            const ext = path.extname(file.originalname);
+            const fileName = `${timestamp}_${randomStr}${ext}`;
+            const cosKey = generateCOSKey('audio', classification.name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_'), fileName);
+            
+            const fileBuffer = file.buffer || fs.readFileSync(file.path);
+            finalUrl = await uploadToCOS(fileBuffer, cosKey, file.mimetype);
+            logger.info(`音声已上传到 COS: ${cosKey}`);
+            
+            if (file.path && !file.buffer) {
+                try { fs.unlinkSync(file.path); } catch (e) { logger.warn('删除临时音频文件失败:', e.message); }
+            }
+        } else {
+            const fileName = path.basename(file.path);
+            finalUrl = path.join('audios', fileName).replace(/\\/g, '/');
+        }
+        
         const result = insert(`
             INSERT INTO audio (classification_id, user_id, name, url, is_review, create_time, update_time)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-        `, [classificationId, userId, name, filePath, isReview, currentTime, currentTime]);
+        `, [classificationId, userId, name, finalUrl, isReview, currentTime, currentTime]);
 
         const message = isReview === 1 ? '音声上传成功' : '音声上传成功，等待审核';
-        logger.info(`音声上传成功: ${name} by user ${userId} (审核状态: ${isReview})`);
+        logger.info(`音声上传成功: ${name} by user ${userId} (审核状态: ${isReview}, 存储: ${isCOSAvailable() ? 'COS' : '本地'})`);
 
         return {
             success: true,

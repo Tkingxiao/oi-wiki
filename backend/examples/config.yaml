@@ -1,44 +1,67 @@
+# HTTP 服务器端口
 httpPort: 6660
+
+# 允许的域名列表
 domainName:
   - http://localhost:6660
   - http://localhost:5173
   - http://localhost:4173
+
+# JWT Token 密钥
 token: maruko
+
+# 日志配置
 log:
   cmd: info
   file: all
+
+# Redis 配置
 redis:
   host: localhost
   port: 6379
   password: null
+
+# 邮件配置
 email:
-  host: smtp.qq.com # 邮箱服务器地址 示例为QQ邮箱
+  host: smtp.qq.com # 邮箱服务器地址（示例为 QQ 邮箱）
   port: 587
   secure: false
   auth:
-    user: xxxx@xx.com
-    # 邮箱账号
-    pass: xxxxxxxxx
-    # 请在邮箱中开启SMTP服务并获取授权码
-    # 邮箱授权码
-  from: xxxx <xxxxx@xx.com>
-  # 发件人姓名
-  subject: xxxx-wiki
-  # 邮件主题
+    user: xxxx@xx.com  # 邮箱账号
+    pass: xxxxxxxxx    # 邮箱授权码（请在邮箱中开启 SMTP 服务并获取）
+  from: xxxx <xxxxx@xx.com>  # 发件人姓名
+  subject: xxxx-wiki  # 邮件主题
+
+# B 站配置
 bilibili:
   roomId: 1809236885
   userId: 3546585537448033
   ttl: 60
+
+# DeepSeek AI 配置
 deepseek:
   apiKey: null
+
+# AI 功能配置
 ai:
   limits:
     authenticated: 100  # 已登录用户每日使用次数
     guest: 5           # 未登录用户每日使用次数
   security:
-    maxRequestsPerMinute: 10  # 每分钟最大请求次数（IP级别）
-    maxRequestsPerHour: 50    # 每小时最大请求次数（IP级别）
+    maxRequestsPerMinute: 10  # 每分钟最大请求次数（IP 级别）
+    maxRequestsPerHour: 50    # 每小时最大请求次数（IP 级别）
     suspiciousThreshold: 20   # 可疑行为阈值（连续失败次数）
     blockDuration: 3600       # 封禁时长（秒）
+
+# 下载配置
 download: 
   audio: 200
+
+# 腾讯云 COS 对象存储配置（可选，不配置则使用本地存储）
+cos:
+  secretId: '你的 SecretId'
+  secretKey: '你的 SecretKey'
+  bucket: '你的 Bucket 名称'
+  region: '地域代码（如 ap-shanghai）'
+  customDomain: '自定义域名（可选）'
+  useHTTPS: true

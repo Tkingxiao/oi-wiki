@@ -4,8 +4,10 @@ import path from 'path';
 import fs from 'fs';
 import https from 'https';
 import axios from 'axios';
+import { uploadToCOS, isCOSAvailable } from './cos.js';
 
 const AVATAR_DIR = '/var/www/oiwiki/backend/data/document/images/avatar';
+const COS_BASE = 'https://oiwiki-1418547858.cos.ap-shanghai.myqcloud.com/';
 
 function ensureAvatarDir() {
     if (!fs.existsSync(AVATAR_DIR)) {
@@ -88,10 +90,19 @@ export async function downloadAvatar(imageUrl, uid) {
             return null;
         }
 
-        fs.writeFileSync(filepath, Buffer.from(res.data));
-        const stats = fs.statSync(filepath);
-        logger.info(`头像下载成功: ${filename}, size=${stats.size}`);
-        return `/api/images/avatar/${filename}`;
+        let avatarUrl;
+        if (isCOSAvailable()) {
+            const cosKey = `avatar/${filename}`;
+            avatarUrl = await uploadToCOS(Buffer.from(res.data), cosKey, 'image/jpeg');
+            logger.info(`头像已上传到 COS: ${cosKey}`);
+        } else {
+            fs.writeFileSync(filepath, Buffer.from(res.data));
+            const stats = fs.statSync(filepath);
+            logger.info(`头像下载成功: ${filename}, size=${stats.size}`);
+            avatarUrl = `/api/images/avatar/${filename}`;
+        }
+
+        return avatarUrl;
     } catch (error) {
         logger.error(`下载头像异常: ${error.message}, url=${imageUrl}`);
         return null;
